@@ -1,0 +1,30 @@
+# Production (VPS) : se branche sur le Traefik DÉJÀ en place — ne démarre pas son propre Traefik.
+# À adapter à ta config : nom du réseau, entrypoint, certresolver
+#   → vérifie avec : docker inspect <conteneur-traefik> | grep -iE "network|certresolver|entrypoint"
+services:
+  app:
+    build: .
+    image: flowergift:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      BASE_URL: https://${APP_DOMAIN}
+    volumes:
+      - flowergift-data:/data
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.flowergift.rule=Host(`${APP_DOMAIN}`)
+      - traefik.http.routers.flowergift.entrypoints=websecure
+      - traefik.http.routers.flowergift.tls.certresolver=letsencrypt
+      - traefik.http.services.flowergift.loadbalancer.server.port=3000
+
+volumes:
+  flowergift-data:
+
+networks:
+  traefik:
+    external: true

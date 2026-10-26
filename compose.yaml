@@ -1,0 +1,11 @@
+# Local : application seule (Docker Desktop)
+services:
+  app:
+    build: .
+    env_file: .env
+    environment:
+      BASE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data

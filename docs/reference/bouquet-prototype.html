@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bouquet ASCII</title>
+<style>
+:root{--bg:#0c0a0f;--panel:#14101a;--line:#2a2233;--txt:#f1e8f4;--mut:#9a8da6;--acc:#ff8fb1;--acc2:#ffd27a}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.app{display:grid;grid-template-columns:310px 1fr;height:100vh}
+aside{padding:24px 20px 28px;border-right:1px solid var(--line);overflow:auto;background:var(--panel)}
+h1{font-size:22px;margin:0 0 4px;letter-spacing:.2px}
+h1 em{font-style:normal;color:var(--acc);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+.sub{margin:0 0 20px;color:var(--mut);font-size:13px}
+section{margin-bottom:18px}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:var(--mut);margin:0 0 8px;font-weight:600}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pills button{font:inherit;color:var(--txt);background:#1d1725;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;transition:.15s}
+.pills button:hover{border-color:#4a3a5a;background:#251d2f}
+.pills button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#2a0f1a;font-weight:600}
+.row{display:flex;align-items:center;gap:10px;margin:6px 0}
+.row label{width:64px;color:var(--mut);font-size:13px}
+.row input[type=range]{flex:1;accent-color:var(--acc)}
+.chk{display:flex;align-items:center;gap:8px;margin-top:8px;color:var(--txt);cursor:pointer}
+.chk input{accent-color:var(--acc);width:16px;height:16px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.actions button{flex:1;font:inherit;color:var(--txt);background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;white-space:nowrap}
+.actions button:hover{border-color:var(--acc);color:var(--acc)}
+.hint{margin-top:14px;color:#6f6379;font-size:12px}
+.hint kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:4px;padding:0 4px;background:#1d1725}
+main{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;min-width:0;
+ background:radial-gradient(ellipse 60% 55% at 50% 45%,#241830 0%,#120d18 55%,#0c0a0f 100%)}
+pre#art{margin:0;line-height:1;white-space:pre;font-family:"JetBrains Mono","Fira Code","SF Mono",ui-monospace,Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace;
+ font-variant-ligatures:none;user-select:text;--mh:140;--ms:100%;--ml:58%}
+pre#art span{color:hsl(var(--h),var(--s),min(94%,calc(var(--l) * var(--m))))}
+pre#art.mono span{color:hsl(var(--mh),var(--ms),min(94%,calc(var(--ml) * var(--m))))}
+.mono-green{--mh:142;--ms:100%;--ml:56%}
+.mono-amber{--mh:36;--ms:100%;--ml:54%}
+.mono-white{--mh:300;--ms:12%;--ml:82%}
+.l0{--m:.55}.l1{--m:.75}.l2{--m:.95}.l3{--m:1.1}.l4{--m:1.28}
+.toast{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:#1d1725;border:1px solid var(--line);padding:8px 14px;border-radius:999px;color:var(--txt);font-size:13px;opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1}
+@media (max-width:820px){
+ .app{grid-template-columns:1fr;grid-template-rows:auto auto;height:auto}
+ main{order:1;height:64vh;min-height:360px}
+ aside{order:2;border-right:0;border-top:1px solid var(--line)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+ <aside>
+  <h1>Bouquet <em>ASCII</em></h1>
+  <p class="sub">Choisis un bouquet, un style, et regarde-le fleurir.</p>
+  <section><h2>Bouquet</h2><div class="pills" id="pBouquet"></div></section>
+  <section><h2>Style ASCII</h2><div class="pills" id="pStyle"></div></section>
+  <section><h2>Couleurs</h2><div class="pills" id="pColor"></div></section>
+  <section><h2>Emballage</h2><div class="pills" id="pWrap"></div></section>
+  <section><h2>Résolution</h2><div class="pills" id="pRes"></div></section>
+  <section><h2>Animation</h2>
+   <div class="row"><label for="rWind">Vent</label><input id="rWind" type="range" min="0" max="2" step="0.05" value="1"></div>
+   <div class="row"><label for="rSpeed">Vitesse</label><input id="rSpeed" type="range" min="0.25" max="2.5" step="0.05" value="1"></div>
+   <label class="chk"><input id="cPart" type="checkbox" checked> Pétales qui tombent</label>
+  </section>
+  <div class="actions">
+   <button id="bReplay">↻ Refleurir</button>
+   <button id="bPause">⏸ Pause</button>
+   <button id="bCopy">⧉ Copier</button>
+  </div>
+  <div class="hint"><kbd>1</kbd>–<kbd>6</kbd> bouquet · <kbd>←</kbd><kbd>→</kbd> style · <kbd>espace</kbd> pause</div>
+ </aside>
+ <main id="stage"><pre id="art" aria-label="Bouquet de fleurs en ASCII art animé"></pre><div class="toast" id="toast"></div></main>
+</div>
+
+<script>
+(()=>{
+"use strict";
+/* ---------- grille & géométrie (unités de scène : hauteur totale = 100) ---------- */
+const RES=[[100,56],[140,78],[180,100]];
+let COLS=140, ROWS=78, S=100/ROWS, N=COLS*ROWS;
+let chw=0.6, cellW=chw*S, cellH=S, cx=COLS*cellW/2;
+let val=new Float32Array(N), slt=new Uint8Array(N), ovr=new Uint16Array(N);
+function setRes(i){
+ COLS=RES[i][0];ROWS=RES[i][1];S=100/ROWS;N=COLS*ROWS;cellW=chw*S;cellH=S;cx=COLS*cellW/2;
+ val=new Float32Array(N);slt=new Uint8Array(N);ovr=new Uint16Array(N);
+}
+
+/* palette : [teinte, saturation, luminosité] */
+const SL={red:0,pink:1,peach:2,yellow:3,white:4,violet:5,blue:6,orange:7,leaf:8,stem:9,brown:10,kraft:11,ribbon:12,glass:13,lav:14,coral:15};
+const SLOTS=[[350,78,52],[332,72,66],[18,88,70],[48,96,58],[40,22,90],[275,58,66],[212,78,66],[28,96,56],[128,52,44],[105,42,38],[26,60,34],[34,46,62],[352,86,52],[192,48,68],[255,55,72],[8,85,62]];
+(()=>{let css="";SLOTS.forEach((c,i)=>{css+=`.s${i}{--h:${c[0]};--s:${c[1]}%;--l:${c[2]}%}`});const st=document.createElement("style");st.textContent=css;document.head.appendChild(st)})();
+
+const cl=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const ease=x=>{x=cl(x);return x*x*(3-2*x)};
+const easeBack=x=>{x=cl(x);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const rng=(seed=1)=>()=>((seed=Math.imul(seed^(seed>>>15),seed|1)^0x9e3779b9,seed^=seed>>>13,(seed>>>0)/4294967296));
+
+/* ---------- bouquets ---------- */
+const H=(k,x,y,R,s,o={})=>({k,x,y,R,s,...o});
+const BOUQUETS=[
+ {id:"roses",name:"Roses",
+  heads:[H("rose",0,26,10,SL.red),H("rose",-15,34,9,SL.pink),H("rose",15,34,9,SL.peach),H("rose",-28,44,8,SL.coral),H("rose",28,44,8,SL.red),H("rose",-8,46,8.5,SL.pink),H("rose",9,47,8,SL.peach),
+   H("gyp",-36,29,5,SL.white),H("gyp",36,27,5,SL.white),H("gyp",-22,15,5,SL.white),H("gyp",23,14,5,SL.white),H("gyp",1,9,5,SL.white),H("gyp",-40,46,4.5,SL.white)],
+  foliage:[[-.55,22,4.5],[.55,22,4.5],[-1.05,20,4],[1.05,20,4],[-.2,18,4],[.25,18,4]]},
+ {id:"tulipes",name:"Tulipes",
+  heads:[H("tulip",0,32,7.5,SL.pink),H("tulip",-13,38,7,SL.red),H("tulip",13,38,7,SL.yellow),H("tulip",-25,46,7,SL.orange),H("tulip",25,46,7,SL.violet),H("tulip",-6,50,6.5,SL.yellow),H("tulip",7,51,6.5,SL.coral)],
+  foliage:[[-.5,32,5],[.5,32,5],[-.95,28,4.5],[.95,28,4.5],[-.2,30,4.5],[.22,30,4.5]],leafL:18},
+ {id:"marguerites",name:"Marguerites",
+  heads:[H("daisy",0,24,6.5,SL.white),H("daisy",-12,30,6.5,SL.white),H("daisy",12,29,6.5,SL.pink),H("daisy",-24,36,6.5,SL.white),H("daisy",24,35,6.5,SL.white),H("daisy",-6,40,6.5,SL.peach),H("daisy",7,41,6.5,SL.white),H("daisy",-33,47,6,SL.white),H("daisy",33,46,6,SL.pink),
+   H("gyp",-38,30,4.5,SL.white),H("gyp",38,28,4.5,SL.white),H("gyp",0,12,4.5,SL.white)],
+  foliage:[[-.5,20,4],[.5,20,4],[-1,18,3.6],[1,18,3.6]]},
+ {id:"tournesols",name:"Tournesols",
+  heads:[H("sun",0,28,11,SL.yellow),H("sun",-19,38,10,SL.orange),H("sun",19,37,10,SL.yellow),H("sun",-9,52,8.5,SL.yellow),H("sun",11,52,8.5,SL.orange)],
+  foliage:[[-.6,26,7],[.6,26,7],[-1.1,22,6],[1.1,22,6],[-.2,22,6],[.2,22,6]],leafL:14},
+ {id:"orchidees",name:"Orchidées",
+  heads:[H("orch",0,27,7,SL.white),H("orch",-19,36,6.5,SL.pink),H("orch",19,36,6.5,SL.violet),H("orch",-9,50,6.5,SL.violet),H("orch",10,51,6.5,SL.white),
+   H("gyp",-36,28,4.5,SL.pink),H("gyp",35,26,4.5,SL.pink),H("gyp",-20,14,4,SL.violet),H("gyp",21,12,4,SL.pink),H("gyp",2,8,4,SL.white)],
+  foliage:[[-.6,30,6],[.6,30,6],[-1.05,26,5.5],[1.05,26,5.5],[-.25,28,5],[.28,28,5]],leafL:16},
+ {id:"champetre",name:"Champêtre",
+  heads:[H("lav",-33,58,5.5,SL.lav),H("lav",34,56,5.5,SL.lav),H("lav",-21,57,5,SL.violet),H("lav",21,58,5,SL.lav),
+   H("rose",-16,34,8,SL.pink),H("rose",14,36,8,SL.red),H("daisy",0,27,7,SL.white),H("daisy",-28,44,6,SL.white),H("daisy",26,45,6,SL.peach),H("tulip",-6,50,6.5,SL.yellow),H("tulip",8,51,6.5,SL.orange),
+   H("gyp",-36,28,4.5,SL.white),H("gyp",36,26,4.5,SL.white),H("gyp",0,12,4.5,SL.white),H("gyp",-44,38,4,SL.white)],
+  foliage:[[-.55,22,4.5],[.55,22,4.5],[-1.05,20,4],[1.05,20,4],[-.2,18,4],[.25,18,4]]}
+];
+BOUQUETS.forEach(b=>{
+ b.heads.forEach((h,i)=>{
+  const r=rng(i*977+b.id.length*131+7);
+  h.idx=i;h.ph=r()*6.283;h.bow=(r()-.5)*7;h.d=0.1*i+r()*0.1;
+  h.filler=(h.k==="gyp"||h.k==="lav");
+  if(h.filler){h.x*=0.85;h.y=40+(h.y-40)*0.88}
+  else{h.x*=0.8;h.y=41+(h.y-41)*0.86;h.R*=(h.k==="orch"?1.12:1.22)}
+  if(h.k==="gyp"){h.dots=[];for(let j=0;j<8;j++){const a=r()*6.283,d=Math.sqrt(r())*h.R;h.dots.push([Math.cos(a)*d,Math.sin(a)*d*0.8,r()*6.283])}}
+ });
+ b.fillers=b.heads.filter(h=>h.filler);
+ b.mains=b.heads.filter(h=>!h.filler).sort((a,c)=>a.y-c.y);
+});
+
+/* ---------- styles ASCII ---------- */
+const STYLES=[
+ {id:"classique",name:"Classique",ramp:" .:-=+*#%@",stem:"|/\\",part:"*"},
+ {id:"detail",name:"Détaillé",ramp:" .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",stem:"|/\\",part:"o"},
+ {id:"blocs",name:"Blocs",ramp:" ░▒▓█",stem:"│╱╲",part:"▒"},
+ {id:"texte",name:"Texte",kind:"text",stem:"|/\\",part:"*"},
+ {id:"binaire",name:"Binaire",kind:"bin",stem:"|/\\",part:"1"},
+ {id:"contour",name:"Contour",kind:"edge",stem:"|/\\",part:"o"}
+];
+const COLORS=[{id:"color",name:"Couleurs"},{id:"mono-green",name:"Terminal"},{id:"mono-amber",name:"Ambre"},{id:"mono-white",name:"Blanc"}];
+const RESN=[{name:"Standard"},{name:"Haute"},{name:"Ultra"}];
+const WRAPS=[{id:"paper",name:"Papier"},{id:"vase",name:"Vase"},{id:"ribbon",name:"Ruban"}];
+
+/* ---------- état UI ---------- */
+const ui={bouquet:0,style:0,color:0,wrap:0,res:1,wind:1,speed:1,part:true,paused:false};
+let tw=0,tb=0,particles=[],partT=0;
+
+/* ---------- primitives de dessin ---------- */
+function area(x0,y0,x1,y1,fn){
+ const c0=Math.max(0,Math.floor(x0/cellW)),c1=Math.min(COLS-1,Math.floor(x1/cellW));
+ const r0=Math.max(0,Math.floor(y0/cellH)),r1=Math.min(ROWS-1,Math.floor(y1/cellH));
+ for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++)fn((c+.5)*cellW,(r+.5)*cellH,r*COLS+c);
+}
+function put(x,y,v,s,ch){
+ const c=Math.floor(x/cellW),r=Math.floor(y/cellH);
+ if(c<0||c>=COLS||r<0||r>=ROWS)return;
+ const i=r*COLS+c;val[i]=v;slt[i]=s;ovr[i]=ch?ch.charCodeAt(0):0;
+}
+const bez=(P,q)=>{const a=(1-q)*(1-q),b=2*(1-q)*q,c=q*q;return[a*P[0]+b*P[2]+c*P[4],a*P[1]+b*P[3]+c*P[5]]};
+const bezT=(P,q)=>[2*(1-q)*(P[2]-P[0])+2*q*(P[4]-P[2]),2*(1-q)*(P[3]-P[1])+2*q*(P[5]-P[3])];
+
+/* ---------- têtes de fleurs : fonctions de forme en repère local (u→droite, w→bas, rayon≈1) ---------- */
+let oV=0,oS=0;
+const FN={
+ rose(u,w,t,h){
+  const r=Math.hypot(u,w),th=Math.atan2(w,u),edge=0.9+0.1*Math.cos(5*th+h.ph);
+  if(r>edge){oV=0;return}
+  const k=r*3.1+(th+t*0.12)/6.2832,f=k-Math.floor(k);
+  let v=(0.3+0.7*Math.pow(f,0.7))*(0.62+0.5*r);
+  if(r>edge-0.08)v=Math.max(v,0.95);
+  oV=cl(v);oS=h.s;
+ },
+ daisy(u,w,t,h){
+  const r=Math.hypot(u,w),th=Math.atan2(w,u)+t*0.05+h.ph;
+  const a=Math.abs(Math.cos(7*th)),pr=0.52+0.48*Math.pow(a,0.45);
+  if(r<0.27){oV=0.55+0.4*(0.5+0.5*Math.cos(r*38)*Math.cos(th*6));oS=SL.yellow;return}
+  if(r<pr){oV=r>pr-0.1?1:0.45+0.5*a*(1-0.35*r);oS=h.s;return}
+  oV=0;
+ },
+ sun(u,w,t,h){
+  const r=Math.hypot(u,w),th=Math.atan2(w,u)+t*0.04+h.ph;
+  if(r<0.5){
+   if(r>0.43){oV=0.85;oS=SL.orange;return}
+   const lat=Math.cos(13*th+14*r)*Math.cos(21*th-9*r);
+   oV=cl(0.5+0.42*lat);oS=SL.brown;return;
+  }
+  const a=Math.abs(Math.cos(11*th)),pr=0.6+0.4*Math.pow(a,0.7);
+  if(r<pr){oV=r>pr-0.09?1:0.4+0.5*a*(1-0.3*r);oS=h.s;return}
+  const a2=Math.abs(Math.cos(11*th+1.571)),pr2=0.52+0.3*Math.pow(a2,0.7);
+  if(r<pr2){oV=0.38;oS=SL.orange;return}
+  oV=0;
+ },
+ tulip(u,w,t,h){
+  const yn=(w+1.3)/1.9;
+  if(yn<0||yn>1){oV=0;return}
+  const au=Math.abs(u);
+  let hw=0.3+0.62*Math.sin(yn*Math.PI*0.78+0.25);
+  if(yn>0.85){const q=(yn-0.85)/0.15;hw*=Math.sqrt(Math.max(0,1-q*q))}
+  if(au>hw){oV=0;return}
+  const g=0.5+0.5*Math.cos(6.2832*u/0.4);
+  if(yn<0.17*(1-g)){oV=0;return}
+  let v=0.5+0.4*Math.cos(u*2.2);
+  if(Math.abs(au-0.2)<0.035&&yn>0.2)v=0.22;
+  if(au>hw-0.09)v=Math.max(v,0.92);
+  oV=cl(v*(0.75+0.35*(1-yn)));oS=h.s;
+ },
+ orch(u,w,t,h){
+  const el=(cx_,cy_,rx,ry)=>Math.hypot((u-cx_)/rx,(w-cy_)/ry);
+  const sw=0.03*Math.sin(t*1.2+h.ph);
+  let d;
+  /* lèvre (labelle) + gorge */
+  d=el(0,0.22,0.2,0.3);
+  if(d<1){if(el(0,0.02,0.1,0.1)<1){oV=0.95;oS=SL.yellow;return}oV=d>0.8?0.95:0.5+0.3*Math.sin(w*22);oS=SL.red;return}
+  /* ailes */
+  for(const s of[-1,1]){
+   d=el(s*(0.52+sw),-0.12,0.52,0.47);
+   if(d<1){const vein=0.5+0.5*Math.cos((Math.atan2(w+0.12,u-s*0.5)+s)*7);oV=cl(d>0.88?0.96:0.4+0.35*(1-d)+0.22*vein*(1-d));oS=h.s;return}
+  }
+  /* sépale dorsal */
+  d=el(0,-0.7,0.3,0.36);
+  if(d<1){oV=d>0.85?0.95:0.45+0.4*(1-d);oS=h.s;return}
+  /* sépales inférieurs */
+  for(const s of[-1,1]){
+   d=el(s*(0.3-sw),0.58,0.24,0.4);
+   if(d<1){oV=d>0.85?0.92:0.35+0.4*(1-d);oS=h.s;return}
+  }
+  oV=0;
+ },
+ lav(u,w,t,h){
+  const t0=-w/2.4;
+  if(t0<0||t0>1){oV=0;return}
+  const hw=0.42*(1-0.62*t0);
+  if(Math.abs(u)>hw){oV=0;return}
+  oV=cl(0.45+0.5*(0.5+0.5*Math.sin(t0*30+u*9+h.ph)));oS=h.s;
+ }
+};
+const EXT={orch:1.15,rose:1.1,daisy:1.1,sun:1.12,tulip:1.5,lav:2.7};
+
+/* ---------- emballages ---------- */
+const WR={endK:0.3,endY:74,anchorY:70};
+function setWrap(){
+ const w=WRAPS[ui.wrap].id;
+ if(w==="paper"){WR.endK=0.3;WR.endY=74;WR.anchorY=70}
+ else if(w==="vase"){WR.endK=0.26;WR.endY=90;WR.anchorY=67}
+ else{WR.endK=0.1;WR.endY=93;WR.anchorY=80}
+}
+
+function drawStem(h){
+ const P=h.P,g=h.g,n=110;
+ if(g<=0)return;
+ const st=STYLES[ui.style].stem,thin=h.k==="gyp"||h.k==="lav";
+ for(let i=0;i<=n;i++){
+  const q=1-i/n; if(q<1-g)break;
+  const p=bez(P,q),T=bezT(P,q),ax=Math.abs(T[0]),ay=Math.abs(T[1]);
+  const ch=ax<0.38*ay?st[0]:(T[0]*T[1]>0?st[2]:st[1]);
+  put(p[0],p[1],thin?0.55:0.7,SL.stem,ch);
+ }
+}
+function drawLeaf(ax,ay,ang,L,W,g){
+ const Lg=L*g; if(Lg<1.2)return;
+ const dx=Math.sin(ang),dy=-Math.cos(ang),tx=ax+dx*L,ty=ay+dy*L,m=W+1;
+ area(Math.min(ax,tx)-m,Math.min(ay,ty)-m,Math.max(ax,tx)+m,Math.max(ay,ty)+m,(sx,sy,i)=>{
+  const px=sx-ax,py=sy-ay,u=(px*dx+py*dy)/L,w=-px*dy+py*dx;
+  if(u<0||u>g)return;
+  const uu=u/g,hw=W*Math.pow(Math.sin(Math.PI*Math.pow(uu,0.8)),0.9)*(0.4+0.6*g);
+  const aw=Math.abs(w);
+  if(aw<hw){val[i]=aw<0.55?0.95:0.32+0.38*(1-aw/hw);slt[i]=SL.leaf;ovr[i]=0}
+ });
+}
+function drawHead(h,t){
+ const Rr=h.R*h.b*(1+0.03*Math.sin(t*1.7+h.ph));
+ if(h.b<=0.02||Rr<0.6)return;
+ const ux=h.ux,uy=h.uy,rx=-uy,ry=ux,e=EXT[h.k]*Rr,f=FN[h.k];
+ area(h.hx-e,h.hy-e,h.hx+e,h.hy+e,(sx,sy,i)=>{
+  const dx=sx-h.hx,dy=sy-h.hy;
+  const u=(dx*rx+dy*ry)/Rr,w=-(dx*ux+dy*uy)/Rr;
+  f(u,w,t,h);
+  if(oV>0){val[i]=oV;slt[i]=oS;ovr[i]=0}
+  else if(h.k!=="lav"&&val[i]>0){f(u*0.86,w*0.86,t,h);if(oV>0){val[i]=0;ovr[i]=0}}
+ });
+}
+function drawGyp(h,t){
+ if(h.b<=0.02)return;
+ for(const d of h.dots){
+  const tw_=0.65+0.35*Math.sin(t*3+d[2]);
+  put(h.hx+d[0]*h.b,h.hy+d[1]*h.b,tw_,h.s);
+ }
+ put(h.hx,h.hy,0.9,h.s);
+}
+function drawLavBranches(){/* les épis sont déjà dessinés via FN.lav */}
+
+function drawPaper(t){
+ const reveal=ease(tb/0.9),yMin=98-33*reveal;
+ const top=dxa=>66+7*(1-Math.pow(Math.min(1,dxa/27),1.5));
+ area(0,64,COLS*cellW,99,(sx,sy,i)=>{
+  if(sy<yMin)return;
+  const dx=sx-cx,ad=Math.abs(dx),hw=3+(98-sy)*0.75;
+  if(ad>hw||sy<top(ad)||sy>98.5)return;
+  let v=0.42+0.22*Math.sin((sx+sy)*1.15)+0.12*Math.sin((sx-sy)*0.5);
+  v*=1-0.3*Math.pow(ad/hw,2);
+  if(ad>hw-1.3)v=0.95;
+  else if(sy<top(ad)+1.9)v=Math.max(v,0.8);
+  val[i]=cl(v);slt[i]=SL.kraft;ovr[i]=0;
+ });
+ /* bande de ruban */
+ const by=84;
+ if(tb>2.2)area(0,by-3,COLS*cellW,by+3,(sx,sy,i)=>{
+  const dx=sx-cx,ad=Math.abs(dx),hw=3+(98-sy)*0.75;
+  if(ad<hw-0.5&&Math.abs(sy-by)<1.5){val[i]=0.78;slt[i]=SL.ribbon;ovr[i]=0}
+ });
+ if(tb>2.4)bow(by,ease((tb-2.4)/0.6));
+}
+function bow(by,k){
+ if(k<=0)return;
+ const loops=[[-1],[1]];
+ for(const [s] of loops){
+  const ccx=cx+s*6.5*k,ccy=by-1.6,rx=6.2*k,ry=3.5*k;
+  area(ccx-rx-1,ccy-ry-1,ccx+rx+1,ccy+ry+1,(sx,sy,i)=>{
+   const d=Math.hypot((sx-ccx)/rx,(sy-ccy)/ry);
+   if(d<1&&d>0.6){val[i]=0.92;slt[i]=SL.ribbon;ovr[i]=0}
+   else if(d<=0.6){val[i]=0.4;slt[i]=SL.ribbon;ovr[i]=0}
+  });
+ }
+ for(const s of[-1,1])for(let q=0;q<=1;q+=0.04){
+  const x=cx+s*(q*5.5)*k+Math.sin(tw*1.3+s)*q*0.6,y=by+2+q*11*k;
+  put(x,y,0.85,SL.ribbon);put(x+s*1.1,y,0.7,SL.ribbon);
+ }
+ area(cx-2.4,by-2.6,cx+2.4,by+1,(sx,sy,i)=>{
+  if(Math.hypot((sx-cx)/2.3,(sy-by+0.8)/1.6)<1){val[i]=1;slt[i]=SL.ribbon;ovr[i]=0}
+ });
+}
+function drawVase(t){
+ const reveal=ease(tb/0.9);
+ area(0,62,COLS*cellW,99,(sx,sy,i)=>{
+  const u=(sy-64)/33;
+  if(u<0||u>1.0||sy>97.2)return;
+  const hw=(9+11*Math.sin(Math.PI*Math.pow(u,0.75)))*(0.4+0.6*reveal);
+  const ad=Math.abs(sx-cx);
+  if(ad>hw+(u<0.07?2:0))return;
+  if(ad>hw-1.4){val[i]=0.88;slt[i]=SL.glass;ovr[i]=0;return}
+  if(u<0.07)return;
+  if(val[i]===0){
+   if(Math.abs(sx-cx+0.55*hw)<0.9){val[i]=0.55;slt[i]=SL.glass}
+   else if(sy>71){val[i]=0.2+0.1*Math.sin(sx*1.2+sy*0.8+tw*1.5);slt[i]=SL.glass}
+  }
+ });
+ area(0,96.5,COLS*cellW,99,(sx,sy,i)=>{if(Math.abs(sx-cx)<26&&sy>96.5&&sy<98.3){val[i]=0.8;slt[i]=SL.kraft;ovr[i]=0}});
+}
+function drawRibbon(){
+ const by=79;
+ if(tb>2.0)area(cx-8,by-3,cx+8,by+3,(sx,sy,i)=>{
+  if(Math.abs(sx-cx)<6.5&&Math.abs(sy-by)<1.4){val[i]=0.8;slt[i]=SL.ribbon;ovr[i]=0}
+ });
+ if(tb>2.2)bow(by,ease((tb-2.2)/0.6));
+}
+
+/* ---------- pétales qui tombent ---------- */
+function updateParticles(dt,b){
+ if(ui.part&&tb>3.4){
+  partT+=dt;
+  while(partT>0.28&&particles.length<18){
+   partT-=0.28;
+   const m=b.mains[Math.floor(Math.random()*b.mains.length)];
+   particles.push({x:m.hx+(Math.random()-.5)*m.R,y:m.hy+(Math.random()-.3)*m.R*.6,vy:3+Math.random()*4,ph:Math.random()*6.28,s:m.s,m:0.6+Math.random()*1.4});
+  }
+  partT=Math.min(partT,0.28);
+ }
+ for(let i=particles.length-1;i>=0;i--){
+  const p=particles[i];
+  p.y+=p.vy*dt;p.x+=Math.sin(tw*1.6+p.ph)*p.m*dt*3+ui.wind*dt*0.8;
+  if(p.y>93||!ui.part)particles.splice(i,1);
+ }
+}
+function drawParticles(){
+ const ch=STYLES[ui.style].part;
+ for(const p of particles)put(p.x,p.y,0.82,p.s,ch);
+}
+
+/* ---------- pose / animation ---------- */
+function pose(h,t){
+ const wd=ui.wind,hg=(94-h.y)/70;
+ const swx=wd*(2.4*Math.sin(t*1.1+h.ph)+1.1*Math.sin(t*2.3+h.ph*1.7)+1.4*Math.sin(t*0.45))*hg;
+ const swy=wd*0.5*Math.sin(t*1.3+h.ph);
+ h.hx=cx+h.x+swx;h.hy=h.y+swy;
+ const ex=cx+h.x*WR.endK,ey=WR.endY;
+ const p1x=h.hx*0.45+ex*0.55+h.bow,p1y=(h.hy+ey)/2;
+ h.P=[h.hx,h.hy,p1x,p1y,ex,ey];
+ let ux=h.hx-p1x,uy=h.hy-p1y;const l=Math.hypot(ux,uy)||1;h.ux=ux/l;h.uy=uy/l;
+ h.g=ease((tb-h.d)/1.3);
+ h.b=h.filler?ease((tb-h.d-1.0)/0.8):easeBack((tb-h.d-1.0)/1.1);
+}
+function frame(dt){
+ val.fill(0);slt.fill(0);ovr.fill(0);
+ const b=BOUQUETS[ui.bouquet],t=tw;
+ b.heads.forEach(h=>pose(h,t));
+ /* feuillage en fond */
+ b.foliage.forEach((f,j)=>{
+  const g=ease((tb-0.15-j*0.08)/1.2),s=Math.sign(f[0]);
+  const ang=f[0]+0.07*ui.wind*Math.sin(t*1.2+j*1.3);
+  drawLeaf(cx+s*(2+Math.abs(f[0])*3),WR.anchorY,ang,f[1],f[2],g);
+ });
+ /* tiges + feuilles sur tiges */
+ b.heads.forEach(h=>{
+  drawStem(h);
+  if(h.k==="gyp"||h.k==="lav")return;
+  const L=b.leafL||10;
+  (h.idx%3===0?[0.55,0.38]:[0.55]).forEach((q,j)=>{
+   const p=bez(h.P,q),gl=cl((h.g-(1-q))*4);if(gl<=0)return;
+   const side=(h.x===0?(h.idx%2?1:-1):Math.sign(h.x))*(j?-1:1);
+   drawLeaf(p[0],p[1],side*(0.95+0.1*j)+0.08*ui.wind*Math.sin(t*1.4+h.ph),L*(1-0.25*j),b.leafL?3.2:2.1,gl);
+  });
+ });
+ b.fillers.forEach(h=>{h.k==="gyp"?drawGyp(h,t):drawHead(h,t)});
+ b.mains.forEach(h=>drawHead(h,t));
+ const w=WRAPS[ui.wrap].id;
+ if(w==="paper")drawPaper(t);else if(w==="vase")drawVase(t);else drawRibbon();
+ updateParticles(dt,b);drawParticles();
+ emit();
+}
+
+/* ---------- sortie texte ---------- */
+const esc=c=>c==="<"?"&lt;":c===">"?"&gt;":c==="&"?"&amp;":c;
+const art=document.getElementById("art");
+function hash(c,r,k){let h=(Math.imul(c,73856093)^Math.imul(r,19349663)^Math.imul(k,83492791))>>>0;h^=h>>>13;h=Math.imul(h,0x5bd1e995);return(h>>>7)&1}
+function emit(){
+ const st=STYLES[ui.style],ramp=st.ramp,kind=st.kind,word="FLEURS",wl=word.length,shift=Math.floor(tw*3);
+ const occ=(c,r)=>(c<0||c>=COLS||r<0||r>=ROWS)?0:(val[r*COLS+c]>0.03?1:0);
+ let out="",cur=-1,hk=Math.floor(tw*5);
+ for(let r=0;r<ROWS;r++){
+  for(let c=0;c<COLS;c++){
+   const i=r*COLS+c,v=val[i];let ch=" ";
+   if(ovr[i])ch=String.fromCharCode(ovr[i]);
+   else if(v>0.03){
+    if(kind==="text"){ch=v<0.26?".":(()=>{const x=word[(c+r*2+shift)%wl];return v<0.62?x.toLowerCase():x})()}
+    else if(kind==="bin"){ch=v<0.24?".":(hash(c,r,hk)?"1":"0")}
+    else if(kind==="edge"){
+     const n4=occ(c-1,r)&&occ(c+1,r)&&occ(c,r-1)&&occ(c,r+1);
+     if(n4)ch=v>0.62?".":" ";
+     else{
+      const gx=(occ(c+1,r)-occ(c-1,r))/cellW,gy=(occ(c,r+1)-occ(c,r-1))/cellH,tx=-gy,ty=gx;
+      if(gx===0&&gy===0)ch="*";
+      else{const ax=Math.abs(tx),ay=Math.abs(ty);ch=ax>2*ay?"-":ay>2*ax?"|":(tx*ty>0?"\\":"/")}
+     }
+    }else ch=ramp[Math.max(1,Math.round(v*(ramp.length-1)))];
+   }
+   if(ch===" "){if(cur>=0){out+="</span>";cur=-1}out+=" ";continue}
+   const key=slt[i]*8+Math.min(4,Math.floor(v*5));
+   if(key!==cur){if(cur>=0)out+="</span>";out+=`<span class="s${slt[i]} l${Math.min(4,Math.floor(v*5))}">`;cur=key}
+   out+=esc(ch);
+  }
+  if(cur>=0){out+="</span>";cur=-1}
+  out+="\n";
+ }
+ art.innerHTML=out;
+}
+
+/* ---------- mise à l'échelle ---------- */
+const stage=document.getElementById("stage");
+function measure(){
+ const s=document.createElement("span");
+ s.style.cssText="position:absolute;visibility:hidden;white-space:pre;font-size:100px;line-height:1;font-family:"+getComputedStyle(art).fontFamily;
+ s.textContent="M".repeat(50);document.body.appendChild(s);
+ const w=s.getBoundingClientRect().width/50/100;s.remove();
+ if(w>0.3&&w<0.8){chw=w;cellW=chw*S;cx=COLS*cellW/2}
+}
+function fit(){
+ const r=stage.getBoundingClientRect();
+ const fs=Math.max(3,Math.min((r.width-16)/(COLS*chw),(r.height-16)/ROWS));
+ art.style.fontSize=fs.toFixed(2)+"px";
+}
+new ResizeObserver(fit).observe(stage);
+
+/* ---------- contrôles ---------- */
+function pills(id,items,key,after){
+ const el=document.getElementById(id);
+ items.forEach((it,i)=>{
+  const b=document.createElement("button");b.type="button";b.textContent=it.name;
+  b.addEventListener("click",()=>{ui[key]=i;sync();after&&after(i)});
+  el.appendChild(b);
+ });
+ return()=>[...el.children].forEach((b,i)=>b.setAttribute("aria-pressed",String(ui[key]===i)));
+}
+const syncs=[
+ pills("pBouquet",BOUQUETS,"bouquet",()=>replay()),
+ pills("pStyle",STYLES,"style"),
+ pills("pColor",COLORS,"color",applyColor),
+ pills("pWrap",WRAPS,"wrap",()=>{setWrap();replay()}),
+ pills("pRes",RESN,"res",()=>{setRes(ui.res);fit()})
+];
+function sync(){syncs.forEach(f=>f())}
+function applyColor(){
+ const id=COLORS[ui.color].id;
+ art.classList.toggle("mono",id!=="color");
+ ["mono-green","mono-amber","mono-white"].forEach(c=>art.classList.toggle(c,c===id));
+}
+function replay(){tb=0;particles=[];partT=0}
+const $=id=>document.getElementById(id);
+$("rWind").addEventListener("input",e=>ui.wind=+e.target.value);
+$("rSpeed").addEventListener("input",e=>ui.speed=+e.target.value);
+$("cPart").addEventListener("change",e=>ui.part=e.target.checked);
+$("bReplay").addEventListener("click",replay);
+function setPause(p){ui.paused=p;$("bPause").textContent=p?"▶ Lecture":"⏸ Pause"}
+$("bPause").addEventListener("click",()=>setPause(!ui.paused));
+const toast=$("toast");let toastT;
+function say(m){toast.textContent=m;toast.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>toast.classList.remove("on"),1600)}
+$("bCopy").addEventListener("click",async()=>{
+ const text=art.textContent.replace(/[ \t]+$/gm,"").replace(/\n+$/,"\n");
+ try{await navigator.clipboard.writeText(text);say("Image ASCII copiée")}
+ catch(e){
+  const ta=document.createElement("textarea");ta.value=text;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();
+  let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();say(ok?"Image ASCII copiée":"Copie impossible ici")
+ }
+});
+addEventListener("keydown",e=>{
+ if(e.target.tagName==="INPUT"&&e.target.type==="range"&&(e.key==="ArrowLeft"||e.key==="ArrowRight"))return;
+ if(e.key>="1"&&e.key<="6"){ui.bouquet=+e.key-1;replay();sync()}
+ else if(e.key==="ArrowRight"){ui.style=(ui.style+1)%STYLES.length;sync()}
+ else if(e.key==="ArrowLeft"){ui.style=(ui.style+STYLES.length-1)%STYLES.length;sync()}
+ else if(e.key===" "&&e.target.tagName!=="BUTTON"){e.preventDefault();setPause(!ui.paused)}
+});
+
+/* ---------- boucle ---------- */
+let last=performance.now(),acc=0;
+function loop(now){
+ requestAnimationFrame(loop);
+ const dt=Math.min(0.1,(now-last)/1000);last=now;acc+=dt;
+ if(acc<(ui.res>1?1/20:1/28))return;
+ const d=acc;acc=0;
+ if(!ui.paused){tw+=d*ui.speed;tb+=d*ui.speed}
+ frame(ui.paused?0:d*ui.speed);
+}
+setRes(ui.res);setWrap();sync();applyColor();
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{measure();fit();});
+measure();fit();
+requestAnimationFrame(loop);
+window.__bouquet={ui,replay,sync,setWrap,get tb(){return tb},set tb(v){tb=v}};
+})();
+</script>
+</body>
+</html>

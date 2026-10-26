@@ -1,0 +1,1 @@
+-- Phase 0 : aucune table métier. Les sessions et cadeaux arrivent aux phases suivantes.
