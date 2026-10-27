@@ -1,7 +1,7 @@
 import rateLimit from '@fastify/rate-limit';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import { BOUQUETS, COLOR_MODES, RESOLUTIONS, STYLES, WRAPS } from '../engine/index.js';
+import { BOUQUETS, COLOR_MODES, RESOLUTIONS, STYLES, WRAPS, isPalette } from '../engine/index.js';
 import type { Config } from './config.js';
 import type Database from 'better-sqlite3';
 import {
@@ -46,6 +46,7 @@ const giftBody = z.object({
   colorMode,
   wrap: wrapId,
   resolution: resolutionId,
+  palette: z.string().min(1).max(40).optional(),
   fromName: z.string().trim().min(1).max(60),
   message: z.string().max(500).nullish(),
   recipientEmail: z.union([z.email(), z.literal(''), z.null()]).optional(),
@@ -172,8 +173,11 @@ export async function registerRoutes(app: FastifyInstance, deps: RouteDeps): Pro
     if (!authed(request, reply)) return;
     const parsed = giftBody.safeParse(request.body);
     if (!parsed.success) return invalid(reply);
+    const palette = parsed.data.palette ?? 'origine';
+    if (!isPalette(parsed.data.bouquetId, palette)) return invalid(reply);
     const gift = createGift(db, config, {
       ...parsed.data,
+      palette,
       message: blankToNull(parsed.data.message),
       recipientEmail: blankToNull(parsed.data.recipientEmail),
     });

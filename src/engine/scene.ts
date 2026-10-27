@@ -2,6 +2,8 @@ import {
   SHAPE_EXTENT,
   SLOT,
   bouquetById,
+  headsForPalette,
+  normalizePalette,
   styleById,
   wrapById,
   type BouquetId,
@@ -23,6 +25,7 @@ export interface RenderOptions {
   wind?: number;
   seed?: number;
   petals?: boolean;
+  palette?: string;
 }
 
 export interface ResolvedOptions {
@@ -35,6 +38,7 @@ export interface ResolvedOptions {
   wind: number;
   seed: number;
   petals: boolean;
+  palette: string;
 }
 
 export interface Grid {
@@ -53,6 +57,7 @@ interface Head {
   y: number;
   R: number;
   s: number;
+  lip?: number;
   idx: number;
   ph: number;
   bow: number;
@@ -109,7 +114,7 @@ function makeGrid(cols: number, rows: number, charAspect: number): Grid {
   };
 }
 
-function initHead(src: { k: FlowerKind; x: number; y: number; R: number; s: number }, index: number, idLength: number): Head {
+function initHead(src: { k: FlowerKind; x: number; y: number; R: number; s: number; lip?: number }, index: number, idLength: number): Head {
   const random = placementRng(index * 977 + idLength * 131 + 7);
   const head: Head = {
     k: src.k,
@@ -117,6 +122,7 @@ function initHead(src: { k: FlowerKind; x: number; y: number; R: number; s: numb
     y: src.y,
     R: src.R,
     s: src.s,
+    lip: src.lip,
     idx: index,
     ph: random() * 6.283,
     bow: (random() - 0.5) * 7,
@@ -151,6 +157,7 @@ function initHead(src: { k: FlowerKind; x: number; y: number; R: number; s: numb
 
 export function createScene(options: RenderOptions): Scene {
   const bouquet = bouquetById(options.bouquetId);
+  const palette = normalizePalette(options.bouquetId, options.palette);
   const resolved: ResolvedOptions = {
     bouquetId: options.bouquetId,
     style: options.style,
@@ -161,8 +168,9 @@ export function createScene(options: RenderOptions): Scene {
     wind: options.wind ?? 1,
     seed: options.seed ?? 1,
     petals: options.petals ?? true,
+    palette,
   };
-  const heads = bouquet.heads.map((head, index) => initHead(head, index, bouquet.id.length));
+  const heads = headsForPalette(bouquet, palette).map((head, index) => initHead(head, index, bouquet.id.length));
   return {
     options: resolved,
     grid: makeGrid(resolved.cols, resolved.rows, resolved.charAspect),

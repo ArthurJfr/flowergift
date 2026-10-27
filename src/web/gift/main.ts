@@ -20,6 +20,7 @@ interface PublicGift {
   colorMode: ColorMode;
   wrap: WrapId;
   resolution: ResolutionId;
+  palette: string;
   fromName: string;
   message: string | null;
   boxTaps: number;
@@ -160,6 +161,7 @@ function renderBox(gift: PublicGift, giftToken: string): void {
     cols: gridSize.cols,
     rows: gridSize.rows,
     seed: 1,
+    palette: gift.palette,
   });
 
   const grid = renderFrame(scene, 6, 8, 0);

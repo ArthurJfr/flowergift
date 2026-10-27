@@ -11,6 +11,7 @@ export interface GiftInput {
   colorMode: ColorMode;
   wrap: WrapId;
   resolution: ResolutionId;
+  palette: string;
   fromName: string;
   message: string | null;
   recipientEmail: string | null;
@@ -26,6 +27,7 @@ export interface GiftDto {
   colorMode: ColorMode;
   wrap: WrapId;
   resolution: ResolutionId;
+  palette: string;
   fromName: string;
   message: string | null;
   recipientEmail: string | null;
@@ -48,6 +50,7 @@ export interface PublicGift {
   colorMode: ColorMode;
   wrap: WrapId;
   resolution: ResolutionId;
+  palette: string;
   fromName: string;
   message: string | null;
   boxTaps: number;
@@ -61,6 +64,7 @@ interface GiftRow {
   color_mode: string;
   wrap: string;
   resolution: string;
+  palette: string;
   from_name: string;
   message: string | null;
   recipient_email: string | null;
@@ -100,6 +104,7 @@ export function toGift(row: GiftRow, config: Config, now = new Date().toISOStrin
     colorMode: row.color_mode as ColorMode,
     wrap: row.wrap as WrapId,
     resolution: row.resolution as ResolutionId,
+    palette: row.palette,
     fromName: row.from_name,
     message: row.message,
     recipientEmail: row.recipient_email,
@@ -133,8 +138,8 @@ export function createGift(db: Database.Database, config: Config, input: GiftInp
   const result = db
     .prepare(
       `INSERT INTO gifts (
-        token, bouquet_id, style, color_mode, wrap, resolution, from_name, message, recipient_email, created_at, expires_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        token, bouquet_id, style, color_mode, wrap, resolution, palette, from_name, message, recipient_email, created_at, expires_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       token,
@@ -143,6 +148,7 @@ export function createGift(db: Database.Database, config: Config, input: GiftInp
       input.colorMode,
       input.wrap,
       input.resolution,
+      input.palette,
       input.fromName,
       input.message,
       input.recipientEmail,
@@ -195,6 +201,7 @@ export function publicGift(db: Database.Database, config: Config, token: string)
     colorMode: row.color_mode as ColorMode,
     wrap: row.wrap as WrapId,
     resolution: row.resolution as ResolutionId,
+    palette: row.palette,
     fromName: row.from_name,
     message: row.message,
     boxTaps: config.giftBoxTaps,

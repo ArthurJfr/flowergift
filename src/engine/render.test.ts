@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { BOUQUETS, type BouquetId } from './catalog.js';
+import { BOUQUETS, SLOT, type BouquetId } from './catalog.js';
 import { createScene, renderFrame } from './scene.js';
 import { toEmailHtml, toHtml, toText } from './serialize.js';
 
@@ -54,6 +54,26 @@ describe('moteur', () => {
     };
     expect(play(1)).toBe(play(1));
     expect(play(1)).not.toBe(play(2));
+  });
+
+  it('peint les orchidées en duo rose et blanc', () => {
+    const used = (palette?: string) => {
+      const scene = createScene({ ...frameOptions, bouquetId: 'orchidees', palette });
+      const grid = renderFrame(scene, 6, 6, 0);
+      const slots = new Set<number>();
+      for (let index = 0; index < grid.val.length; index += 1) {
+        if ((grid.val[index] ?? 0) > 0) slots.add(grid.slot[index] ?? 0);
+      }
+      return slots;
+    };
+    const duo = used('rose-blanc');
+    const mixed = used('origine');
+    expect(duo.has(SLOT.pink)).toBe(true);
+    expect(duo.has(SLOT.white)).toBe(true);
+    expect(duo.has(SLOT.violet)).toBe(false);
+    expect(duo.has(SLOT.lav)).toBe(false);
+    expect(duo.has(SLOT.red)).toBe(false);
+    expect(mixed.has(SLOT.violet)).toBe(true);
   });
 
   it.each(BOUQUETS.map((bouquet) => bouquet.id))('snapshot %s', (bouquetId) => {

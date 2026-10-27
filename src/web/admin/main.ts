@@ -1,6 +1,10 @@
 import {
+  PALETTES,
   RESOLUTIONS,
+  SLOTS,
+  bouquetById,
   createScene,
+  paletteSwatches,
   renderFrame,
   toHtml,
   type BouquetId,
@@ -28,6 +32,7 @@ interface Gift {
   colorMode: ColorMode;
   wrap: WrapId;
   resolution: ResolutionId;
+  palette: string;
   fromName: string;
   message: string | null;
   recipientEmail: string | null;
@@ -74,6 +79,7 @@ const choice = {
   colorMode: 'color' as ColorMode,
   wrap: 'paper' as WrapId,
   resolution: 'high' as ResolutionId,
+  palette: 'origine',
 };
 
 let catalog: Catalog | null = null;
@@ -109,7 +115,7 @@ function resolutionOf(id: ResolutionId) {
 }
 
 function ensureScene(cols: number, rows: number): Scene {
-  if (!scene || scene.options.bouquetId !== choice.bouquetId || scene.options.cols !== cols || scene.options.rows !== rows) {
+  if (!scene || scene.options.bouquetId !== choice.bouquetId || scene.options.palette !== choice.palette || scene.options.cols !== cols || scene.options.rows !== rows) {
     scene = createScene({
       bouquetId: choice.bouquetId,
       style: choice.style,
@@ -118,6 +124,7 @@ function ensureScene(cols: number, rows: number): Scene {
       rows,
       seed: 1,
       wind: 1,
+      palette: choice.palette,
     });
     clock = 6;
   }
@@ -157,6 +164,36 @@ function loop(): void {
 function stop(): void {
   running = false;
   cancelAnimationFrame(frame);
+}
+
+function colorDot(slot: number): HTMLElement {
+  const color = SLOTS[slot] ?? SLOTS[0];
+  const dot = el('i');
+  if (!color) return dot;
+  dot.style.background = `hsl(${color[0]} ${color[1]}% ${color[2]}%)`;
+  return dot;
+}
+
+function paletteChoices(bouquetId: BouquetId, current: string, onPick: (id: string) => void): HTMLElement {
+  const wrap = el('div', 'swatches');
+  for (const item of PALETTES[bouquetId]) {
+    const button = el('button');
+    button.type = 'button';
+    button.dataset.id = item.id;
+    button.setAttribute('aria-pressed', String(item.id === current));
+    button.setAttribute('aria-label', item.name);
+    const dots = el('span', 'dots');
+    for (const slot of paletteSwatches(bouquetId, item.id)) dots.append(colorDot(slot));
+    button.append(dots, el('span', '', item.name));
+    button.addEventListener('click', () => {
+      onPick(item.id);
+      for (const child of wrap.querySelectorAll('button')) {
+        child.setAttribute('aria-pressed', String(child.dataset.id === item.id));
+      }
+    });
+    wrap.append(button);
+  }
+  return wrap;
 }
 
 function pills(items: Named[], current: string, onPick: (id: string) => void): HTMLElement {
@@ -243,6 +280,14 @@ async function showDash(): Promise<void> {
   const side = el('div', 'side');
   const thumbs = el('div', 'thumbs');
   side.append(el('h2', '', 'Bouquets'), thumbs);
+  const paletteBox = el('div');
+  side.append(el('h2', '', 'Palette'), paletteBox);
+  const renderPalettes = () => {
+    paletteBox.replaceChildren(paletteChoices(choice.bouquetId, choice.palette, (id) => {
+      choice.palette = id;
+      scene = null;
+    }));
+  };
   side.append(el('h2', '', 'Style'), pills(catalog.styles, choice.style, (id) => { choice.style = id as StyleId; }));
   side.append(el('h2', '', 'Couleurs'), pills(catalog.colorModes, choice.colorMode, (id) => { choice.colorMode = id as ColorMode; }));
   side.append(el('h2', '', 'Emballage'), pills(catalog.wraps, choice.wrap, (id) => { choice.wrap = id as WrapId; }));
@@ -291,8 +336,12 @@ async function showDash(): Promise<void> {
     if (small) paint(thumb, small.cols, Math.round(small.rows * 0.45), false);
     button.append(thumb, el('span', '', bouquet.name));
     button.addEventListener('click', () => {
-      choice.bouquetId = bouquet.id as BouquetId;
-      scene = null;
+      if (choice.bouquetId !== bouquet.id) {
+        choice.bouquetId = bouquet.id as BouquetId;
+        choice.palette = 'origine';
+        scene = null;
+        renderPalettes();
+      }
       for (const child of thumbs.querySelectorAll('button')) {
         child.setAttribute('aria-pressed', String(child.dataset.id === bouquet.id));
       }
@@ -301,6 +350,7 @@ async function showDash(): Promise<void> {
   }
   choice.bouquetId = selected;
   scene = null;
+  renderPalettes();
 
   async function payload() {
     return {
@@ -339,7 +389,10 @@ async function showDash(): Promise<void> {
     if (result.status !== 200) return;
     for (const gift of result.body.items) {
       const card = el('article');
+      const bouquetName = bouquetById(gift.bouquetId).name;
+      const paletteName = PALETTES[gift.bouquetId].find((item) => item.id === gift.palette)?.name ?? 'Varié';
       card.append(el('strong', '', `${gift.fromName} · ${statusLabel(gift.status)}`));
+      card.append(el('p', 'muted', `${bouquetName} · ${paletteName}`));
       card.append(el('p', 'muted', new Date(gift.createdAt).toLocaleString('fr')));
       card.append(el('p', 'muted', `Clic dans le mail : ${when(gift.firstClickedAt, gift.clickCount)}`));
       card.append(el('p', 'muted', `Ouverture du bouquet : ${when(gift.firstOpenedAt, gift.openCount)}`));

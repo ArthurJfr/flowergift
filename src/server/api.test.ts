@@ -132,6 +132,7 @@ describe('api', () => {
       resolution: 'standard',
       fromName: 'Arthur',
       message: 'Pour <toi>',
+      palette: 'origine',
       boxTaps: 2,
     });
 
@@ -223,6 +224,47 @@ describe('api', () => {
     const stored = await app.inject({ method: 'GET', url: `/api/gifts/${created.json().id}`, headers: { cookie } });
     expect(stored.json().status).toBe('created');
     expect(stored.json().sentAt).toBeNull();
+    await app.close();
+  });
+
+  it('enregistre le duo de couleurs et refuse une palette d’un autre bouquet', async () => {
+    const { app } = await start();
+    const login = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email: 'admin@example.com', password } });
+    const cookie = cookieOf(login.headers['set-cookie']);
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/gifts',
+      headers: { cookie },
+      payload: {
+        bouquetId: 'orchidees',
+        style: 'classique',
+        colorMode: 'color',
+        wrap: 'paper',
+        resolution: 'standard',
+        palette: 'rose-blanc',
+        fromName: 'Arthur',
+      },
+    });
+    expect(created.statusCode).toBe(201);
+    expect(created.json().palette).toBe('rose-blanc');
+    const pub = await app.inject({ method: 'GET', url: `/api/public/gifts/${created.json().token}` });
+    expect(pub.json().palette).toBe('rose-blanc');
+
+    const rejected = await app.inject({
+      method: 'POST',
+      url: '/api/gifts',
+      headers: { cookie },
+      payload: {
+        bouquetId: 'orchidees',
+        style: 'classique',
+        colorMode: 'color',
+        wrap: 'paper',
+        resolution: 'standard',
+        palette: 'rouge-jaune',
+        fromName: 'Arthur',
+      },
+    });
+    expect(rejected.statusCode).toBe(400);
     await app.close();
   });
 });

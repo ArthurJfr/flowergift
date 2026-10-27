@@ -59,6 +59,8 @@ export interface HeadSource {
   y: number;
   R: number;
   s: number;
+  /** Lèvre des orchidées, quand la palette est un duo. */
+  lip?: number;
 }
 
 export interface BouquetDef {
@@ -105,139 +107,136 @@ export const BOUQUETS: readonly BouquetDef[] = [
     id: 'roses',
     name: 'Roses',
     heads: [
-      H('rose', 0, 26, 10, SLOT.red),
-      H('rose', -15, 34, 9, SLOT.pink),
-      H('rose', 15, 34, 9, SLOT.peach),
-      H('rose', -28, 44, 8, SLOT.coral),
-      H('rose', 28, 44, 8, SLOT.red),
-      H('rose', -8, 46, 8.5, SLOT.pink),
-      H('rose', 9, 47, 8, SLOT.peach),
-      H('gyp', -36, 29, 5, SLOT.white),
-      H('gyp', 36, 27, 5, SLOT.white),
-      H('gyp', -22, 15, 5, SLOT.white),
-      H('gyp', 23, 14, 5, SLOT.white),
-      H('gyp', 1, 9, 5, SLOT.white),
-      H('gyp', -40, 46, 4.5, SLOT.white),
+      H('rose', 0, 24, 11, SLOT.red),
+      H('rose', -16, 30, 9.5, SLOT.pink),
+      H('rose', 16, 31, 9.5, SLOT.coral),
+      H('rose', -30, 40, 8.5, SLOT.red),
+      H('rose', 30, 41, 8.5, SLOT.pink),
+      H('rose', -8, 42, 8, SLOT.peach),
+      H('rose', 9, 44, 8, SLOT.white),
+      H('rose', 0, 50, 7.5, SLOT.red),
+      H('gyp', -38, 22, 5, SLOT.white),
+      H('gyp', 38, 20, 5, SLOT.white),
+      H('gyp', -24, 14, 4.5, SLOT.white),
+      H('gyp', 24, 13, 4.5, SLOT.white),
+      H('gyp', 0, 8, 4.5, SLOT.white),
+      H('gyp', -42, 38, 4, SLOT.white),
+      H('gyp', 42, 36, 4, SLOT.white),
     ],
     foliage: [
-      [-0.55, 22, 4.5],
-      [0.55, 22, 4.5],
-      [-1.05, 20, 4],
-      [1.05, 20, 4],
-      [-0.2, 18, 4],
-      [0.25, 18, 4],
+      [-0.7, 24, 5],
+      [0.7, 24, 5],
+      [-1.15, 22, 4.4],
+      [1.15, 22, 4.4],
+      [-0.25, 20, 4.2],
+      [0.3, 20, 4.2],
     ],
   },
   {
     id: 'tulipes',
     name: 'Tulipes',
     heads: [
-      H('tulip', 0, 32, 7.5, SLOT.pink),
-      H('tulip', -13, 38, 7, SLOT.red),
-      H('tulip', 13, 38, 7, SLOT.yellow),
-      H('tulip', -25, 46, 7, SLOT.orange),
-      H('tulip', 25, 46, 7, SLOT.violet),
-      H('tulip', -6, 50, 6.5, SLOT.yellow),
-      H('tulip', 7, 51, 6.5, SLOT.coral),
+      H('tulip', 0, 14, 8, SLOT.red),
+      H('tulip', -18, 18, 7.5, SLOT.yellow),
+      H('tulip', 18, 20, 7.5, SLOT.pink),
+      H('tulip', -32, 28, 7, SLOT.violet),
+      H('tulip', 32, 30, 7, SLOT.white),
+      H('tulip', -8, 36, 6.5, SLOT.orange),
+      H('tulip', 10, 38, 6.5, SLOT.coral),
     ],
     foliage: [
-      [-0.5, 32, 5],
-      [0.5, 32, 5],
-      [-0.95, 28, 4.5],
-      [0.95, 28, 4.5],
-      [-0.2, 30, 4.5],
-      [0.22, 30, 4.5],
+      [-0.85, 28, 4.2],
+      [0.85, 28, 4.2],
+      [-1.35, 24, 3.6],
+      [1.35, 24, 3.6],
     ],
-    leafL: 18,
+    leafL: 22,
   },
   {
     id: 'marguerites',
     name: 'Marguerites',
     heads: [
-      H('daisy', 0, 24, 6.5, SLOT.white),
-      H('daisy', -12, 30, 6.5, SLOT.white),
-      H('daisy', 12, 29, 6.5, SLOT.pink),
-      H('daisy', -24, 36, 6.5, SLOT.white),
-      H('daisy', 24, 35, 6.5, SLOT.white),
-      H('daisy', -6, 40, 6.5, SLOT.peach),
-      H('daisy', 7, 41, 6.5, SLOT.white),
-      H('daisy', -33, 47, 6, SLOT.white),
-      H('daisy', 33, 46, 6, SLOT.pink),
-      H('gyp', -38, 30, 4.5, SLOT.white),
-      H('gyp', 38, 28, 4.5, SLOT.white),
-      H('gyp', 0, 12, 4.5, SLOT.white),
+      H('daisy', 0, 20, 8, SLOT.white),
+      H('daisy', -18, 26, 7, SLOT.white),
+      H('daisy', 18, 25, 7, SLOT.white),
+      H('daisy', -34, 34, 6.5, SLOT.pink),
+      H('daisy', 34, 33, 6.5, SLOT.white),
+      H('daisy', -8, 38, 6.5, SLOT.white),
+      H('daisy', 10, 40, 6.5, SLOT.peach),
+      H('daisy', -24, 46, 6, SLOT.white),
+      H('daisy', 24, 47, 6, SLOT.pink),
+      H('gyp', -42, 18, 4.5, SLOT.white),
+      H('gyp', 42, 16, 4.5, SLOT.white),
+      H('gyp', -12, 10, 4, SLOT.white),
+      H('gyp', 14, 9, 4, SLOT.white),
+      H('gyp', 0, 8, 4, SLOT.white),
     ],
     foliage: [
-      [-0.5, 20, 4],
-      [0.5, 20, 4],
-      [-1, 18, 3.6],
-      [1, 18, 3.6],
+      [-0.45, 18, 3.4],
+      [0.45, 18, 3.4],
+      [-0.95, 16, 3],
+      [0.95, 16, 3],
     ],
   },
   {
     id: 'tournesols',
     name: 'Tournesols',
     heads: [
-      H('sun', 0, 28, 11, SLOT.yellow),
-      H('sun', -19, 38, 10, SLOT.orange),
-      H('sun', 19, 37, 10, SLOT.yellow),
-      H('sun', -9, 52, 8.5, SLOT.yellow),
-      H('sun', 11, 52, 8.5, SLOT.orange),
+      H('sun', -6, 20, 13.5, SLOT.yellow),
+      H('sun', 20, 32, 12, SLOT.orange),
+      H('sun', -24, 42, 10.5, SLOT.yellow),
+      H('sun', 8, 50, 9, SLOT.yellow),
     ],
     foliage: [
-      [-0.6, 26, 7],
-      [0.6, 26, 7],
-      [-1.1, 22, 6],
-      [1.1, 22, 6],
-      [-0.2, 22, 6],
-      [0.2, 22, 6],
+      [-0.9, 30, 7.5],
+      [0.9, 30, 7.5],
+      [-1.4, 26, 6.5],
+      [1.4, 26, 6.5],
+      [-0.2, 24, 6],
+      [0.25, 24, 6],
     ],
-    leafL: 14,
+    leafL: 20,
   },
   {
     id: 'orchidees',
     name: 'Orchidées',
     heads: [
-      H('orch', 0, 27, 7, SLOT.white),
-      H('orch', -19, 36, 6.5, SLOT.pink),
-      H('orch', 19, 36, 6.5, SLOT.violet),
-      H('orch', -9, 50, 6.5, SLOT.violet),
-      H('orch', 10, 51, 6.5, SLOT.white),
-      H('gyp', -36, 28, 4.5, SLOT.pink),
-      H('gyp', 35, 26, 4.5, SLOT.pink),
-      H('gyp', -20, 14, 4, SLOT.violet),
-      H('gyp', 21, 12, 4, SLOT.pink),
-      H('gyp', 2, 8, 4, SLOT.white),
+      H('orch', -4, 16, 8.5, SLOT.white),
+      H('orch', 18, 28, 8, SLOT.violet),
+      H('orch', -22, 36, 7.5, SLOT.pink),
+      H('orch', 6, 48, 7.5, SLOT.lav),
+      H('gyp', 32, 18, 3.5, SLOT.white),
+      H('gyp', -34, 22, 3.5, SLOT.pink),
+      H('gyp', 28, 44, 3, SLOT.violet),
     ],
     foliage: [
-      [-0.6, 30, 6],
-      [0.6, 30, 6],
-      [-1.05, 26, 5.5],
-      [1.05, 26, 5.5],
-      [-0.25, 28, 5],
-      [0.28, 28, 5],
+      [-0.4, 26, 4.5],
+      [0.45, 26, 4.5],
+      [-0.9, 22, 4],
+      [0.95, 22, 4],
     ],
-    leafL: 16,
+    leafL: 18,
   },
   {
     id: 'champetre',
     name: 'Champêtre',
     heads: [
-      H('lav', -33, 58, 5.5, SLOT.lav),
-      H('lav', 34, 56, 5.5, SLOT.lav),
-      H('lav', -21, 57, 5, SLOT.violet),
-      H('lav', 21, 58, 5, SLOT.lav),
-      H('rose', -16, 34, 8, SLOT.pink),
-      H('rose', 14, 36, 8, SLOT.red),
-      H('daisy', 0, 27, 7, SLOT.white),
-      H('daisy', -28, 44, 6, SLOT.white),
-      H('daisy', 26, 45, 6, SLOT.peach),
-      H('tulip', -6, 50, 6.5, SLOT.yellow),
-      H('tulip', 8, 51, 6.5, SLOT.orange),
-      H('gyp', -36, 28, 4.5, SLOT.white),
-      H('gyp', 36, 26, 4.5, SLOT.white),
-      H('gyp', 0, 12, 4.5, SLOT.white),
-      H('gyp', -44, 38, 4, SLOT.white),
+      H('lav', -36, 16, 6, SLOT.lav),
+      H('lav', 38, 18, 6, SLOT.violet),
+      H('lav', -24, 22, 5.2, SLOT.lav),
+      H('lav', 26, 24, 5.2, SLOT.blue),
+      H('daisy', -8, 28, 7, SLOT.white),
+      H('daisy', 12, 34, 6.5, SLOT.blue),
+      H('daisy', -30, 42, 6, SLOT.white),
+      H('daisy', 32, 44, 6, SLOT.peach),
+      H('rose', 0, 46, 8, SLOT.coral),
+      H('tulip', -14, 52, 6.2, SLOT.yellow),
+      H('tulip', 16, 54, 6, SLOT.red),
+      H('gyp', -44, 34, 4.5, SLOT.white),
+      H('gyp', 46, 32, 4.5, SLOT.white),
+      H('gyp', -6, 12, 4, SLOT.white),
+      H('gyp', 8, 10, 4, SLOT.white),
+      H('gyp', 0, 58, 3.5, SLOT.white),
     ],
     foliage: [
       [-0.55, 22, 4.5],
@@ -285,13 +284,113 @@ export const RESOLUTIONS: readonly ResolutionDef[] = [
 ];
 
 export const SHAPE_EXTENT: Record<Exclude<FlowerKind, 'gyp'>, number> = {
-  orch: 1.15,
-  rose: 1.1,
-  daisy: 1.1,
-  sun: 1.12,
-  tulip: 1.5,
-  lav: 2.7,
+  orch: 1.2,
+  rose: 1.08,
+  daisy: 1.08,
+  sun: 1.16,
+  tulip: 1.55,
+  lav: 2.85,
 };
+
+export interface PaletteDef {
+  id: string;
+  name: string;
+  /** Absent : on garde les couleurs dessinées dans le bouquet. */
+  colors?: readonly number[];
+  /** Orchidées : pétales et lèvre échangent les deux teintes d'une fleur à l'autre. */
+  duo?: boolean;
+}
+
+export const PALETTES: Record<BouquetId, readonly PaletteDef[]> = {
+  roses: [
+    { id: 'origine', name: 'Varié' },
+    { id: 'rouge-rose', name: 'Rouge & rose', colors: [SLOT.red, SLOT.pink] },
+    { id: 'blanc-rose', name: 'Blanc & rose', colors: [SLOT.white, SLOT.pink] },
+    { id: 'corail-peche', name: 'Corail & pêche', colors: [SLOT.coral, SLOT.peach] },
+    { id: 'rouge-blanc', name: 'Rouge & blanc', colors: [SLOT.red, SLOT.white] },
+    { id: 'peche-blanc', name: 'Pêche & blanc', colors: [SLOT.peach, SLOT.white] },
+  ],
+  tulipes: [
+    { id: 'origine', name: 'Jardin' },
+    { id: 'rouge-jaune', name: 'Rouge & jaune', colors: [SLOT.red, SLOT.yellow] },
+    { id: 'rose-blanc', name: 'Rose & blanc', colors: [SLOT.pink, SLOT.white] },
+    { id: 'violet-blanc', name: 'Violet & blanc', colors: [SLOT.violet, SLOT.white] },
+    { id: 'orange-jaune', name: 'Orange & jaune', colors: [SLOT.orange, SLOT.yellow] },
+  ],
+  marguerites: [
+    { id: 'origine', name: 'Mélange' },
+    { id: 'blanc', name: 'Blanc', colors: [SLOT.white] },
+    { id: 'rose-blanc', name: 'Rose & blanc', colors: [SLOT.pink, SLOT.white] },
+    { id: 'peche-blanc', name: 'Pêche & blanc', colors: [SLOT.peach, SLOT.white] },
+  ],
+  tournesols: [
+    { id: 'origine', name: 'Soleil' },
+    { id: 'jaune', name: 'Jaune', colors: [SLOT.yellow] },
+    { id: 'orange-jaune', name: 'Orange & jaune', colors: [SLOT.orange, SLOT.yellow] },
+  ],
+  orchidees: [
+    { id: 'origine', name: 'Varié' },
+    { id: 'rose-blanc', name: 'Rose & blanc', colors: [SLOT.pink, SLOT.white], duo: true },
+    { id: 'violet-blanc', name: 'Violet & blanc', colors: [SLOT.violet, SLOT.white], duo: true },
+    { id: 'lavande-blanc', name: 'Lavande & blanc', colors: [SLOT.lav, SLOT.white], duo: true },
+    { id: 'corail-blanc', name: 'Corail & blanc', colors: [SLOT.coral, SLOT.white], duo: true },
+    { id: 'peche-rose', name: 'Pêche & rose', colors: [SLOT.peach, SLOT.pink], duo: true },
+    { id: 'violet-rose', name: 'Violet & rose', colors: [SLOT.violet, SLOT.pink], duo: true },
+  ],
+  champetre: [
+    { id: 'origine', name: 'Mélange' },
+    { id: 'lavande-blanc', name: 'Lavande & blanc', colors: [SLOT.lav, SLOT.white] },
+    { id: 'bleu-blanc', name: 'Bleu & blanc', colors: [SLOT.blue, SLOT.white] },
+    { id: 'rose-peche', name: 'Rose & pêche', colors: [SLOT.pink, SLOT.peach] },
+  ],
+};
+
+export function isPalette(bouquetId: BouquetId, id: string): boolean {
+  return PALETTES[bouquetId].some((palette) => palette.id === id);
+}
+
+export function normalizePalette(bouquetId: BouquetId, id: string | undefined): string {
+  return id && isPalette(bouquetId, id) ? id : 'origine';
+}
+
+export function paletteSwatches(bouquetId: BouquetId, paletteId: string): readonly number[] {
+  const palette = PALETTES[bouquetId].find((item) => item.id === paletteId);
+  if (palette?.colors) return palette.colors;
+  const seen: number[] = [];
+  for (const head of bouquetById(bouquetId).heads) {
+    if (head.k === 'gyp' || seen.includes(head.s)) continue;
+    seen.push(head.s);
+  }
+  return seen;
+}
+
+function lighterSlot(colors: readonly number[]): number {
+  let best = colors[0] ?? SLOT.white;
+  let light = SLOTS[best]?.[2] ?? 0;
+  for (const slot of colors) {
+    const value = SLOTS[slot]?.[2] ?? 0;
+    if (value > light) {
+      best = slot;
+      light = value;
+    }
+  }
+  return best;
+}
+
+export function headsForPalette(bouquet: BouquetDef, paletteId: string | undefined): readonly HeadSource[] {
+  const palette = PALETTES[bouquet.id].find((item) => item.id === normalizePalette(bouquet.id, paletteId));
+  const colors = palette?.colors;
+  if (!colors || colors.length === 0) return bouquet.heads;
+  const fill = lighterSlot(colors);
+  let flower = 0;
+  return bouquet.heads.map((head) => {
+    if (head.k === 'gyp') return { ...head, s: fill };
+    const petal = colors[flower % colors.length] ?? head.s;
+    const lip = palette?.duo ? colors[(flower + 1) % colors.length] : undefined;
+    flower += 1;
+    return lip === undefined ? { ...head, s: petal } : { ...head, s: petal, lip };
+  });
+}
 
 export function bouquetById(id: BouquetId): BouquetDef {
   const found = BOUQUETS.find((bouquet) => bouquet.id === id);
