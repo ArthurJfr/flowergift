@@ -5,7 +5,6 @@ import {
   clearParticles,
   createScene,
   renderFrame,
-  slotCss,
   toHtml,
   type ColorMode,
   type ResolutionId,
@@ -41,9 +40,6 @@ function required<T extends Element>(selector: string): T {
 }
 
 const app = required<HTMLElement>('#app');
-const colors = document.createElement('style');
-colors.textContent = slotCss();
-document.head.appendChild(colors);
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fromMail = new URLSearchParams(location.search).get('via') === 'mail';
@@ -134,7 +130,10 @@ function renderBox(gift: PublicGift, giftToken: string): void {
   replay.textContent = 'Rejouer l’ouverture';
   replay.hidden = true;
   visual.append(canvas, button);
-  stage.append(visual, hint, description, bouquetName, message, from, replay);
+  const caption = document.createElement('div');
+  caption.className = 'caption';
+  caption.append(hint, bouquetName, message, from, replay);
+  stage.append(visual, description, caption);
   main.append(stage);
   app.append(main);
 
@@ -167,7 +166,6 @@ function renderBox(gift: PublicGift, giftToken: string): void {
   const glyphs = constellationGlyphs(
     toHtml(grid, { style: gift.style, colorMode: gift.colorMode, t: 6 }),
     gift.colorMode,
-    visual,
   );
   const placed = placementOf(glyphs);
 
@@ -361,35 +359,11 @@ function renderBox(gift: PublicGift, giftToken: string): void {
   setIdle();
 }
 
-function constellationGlyphs(html: string, colorMode: ColorMode, host: HTMLElement): ConstellationGlyph[] {
-  const probe = document.createElement('pre');
-  probe.className = `art color-probe${colorMode === 'color' ? '' : ` mono ${colorMode}`}`;
-  probe.innerHTML = html;
-  host.append(probe);
-  const glyphs: ConstellationGlyph[] = [];
-  let col = 0;
-  let row = 0;
-  let index = 0;
-
-  for (const node of probe.childNodes) {
-    const text = node.textContent ?? '';
-    const color = node instanceof HTMLElement ? getComputedStyle(node).color : 'rgb(246, 239, 232)';
-    for (const ch of text) {
-      if (ch === '\n') {
-        col = 0;
-        row += 1;
-      } else {
-        if (ch !== ' ') {
-          const seed = Math.imul(col + 11, 73856093) ^ Math.imul(row + 17, 19349663) ^ index;
-          glyphs.push({ ch, color, col, row, seed: seed >>> 0 });
-          index += 1;
-        }
-        col += 1;
-      }
-    }
-  }
-  probe.remove();
-  return glyphs;
+function constellationGlyphs(html: string, colorMode: ColorMode): ConstellationGlyph[] {
+  return cellsFromHtml(html, colorMode).map((cell, index) => {
+    const seed = Math.imul(cell.col + 11, 73856093) ^ Math.imul(cell.row + 17, 19349663) ^ index;
+    return { ch: cell.ch, color: cell.color, col: cell.col, row: cell.row, seed: seed >>> 0 };
+  });
 }
 
 interface Placement {
@@ -408,8 +382,10 @@ function placementOf(glyphs: ConstellationGlyph[]): Placement {
 }
 
 function fitBouquet(width: number, height: number, placed: Placement) {
-  const fontSize = Math.max(3, Math.min((width - 28) / (placed.cols * 0.61), (height - 24) / placed.rows));
-  const cellWidth = fontSize * 0.61;
+  const padX = Math.max(6, width * 0.015);
+  const padY = Math.max(6, height * 0.015);
+  const fontSize = Math.max(3, Math.min((width - padX * 2) / (placed.cols * 0.62), (height - padY * 2) / placed.rows));
+  const cellWidth = fontSize * 0.62;
   return {
     fontSize,
     cellWidth,

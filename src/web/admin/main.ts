@@ -2,7 +2,6 @@ import {
   RESOLUTIONS,
   createScene,
   renderFrame,
-  slotCss,
   toHtml,
   type BouquetId,
   type ColorMode,
@@ -68,9 +67,6 @@ function required<T extends Element>(selector: string): T {
 }
 
 const app = required<HTMLElement>('#app');
-const colors = document.createElement('style');
-colors.textContent = slotCss();
-document.head.appendChild(colors);
 
 const choice = {
   bouquetId: 'roses' as BouquetId,
@@ -244,7 +240,7 @@ async function showDash(): Promise<void> {
   const preview = el('pre', 'art');
   preview.id = 'preview';
   stage.append(preview);
-  const side = el('div');
+  const side = el('div', 'side');
   const thumbs = el('div', 'thumbs');
   side.append(el('h2', '', 'Bouquets'), thumbs);
   side.append(el('h2', '', 'Style'), pills(catalog.styles, choice.style, (id) => { choice.style = id as StyleId; }));
@@ -274,7 +270,7 @@ async function showDash(): Promise<void> {
   side.append(actions, note, feedback, share);
   layout.append(stage, side);
   dash.append(layout);
-  const history = el('section');
+  const history = el('section', 'history-block');
   history.append(el('h2', '', 'Historique'));
   const list = el('div', 'history');
   history.append(list);

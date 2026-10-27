@@ -1,24 +1,38 @@
 :root { color-scheme: dark; --bg: #08070d; --txt: #f6efe8; --mut: #cbb8ac; --acc: #e7a0b0; }
 * { box-sizing: border-box; }
+html, body, #app { height: 100%; }
 body {
-  margin: 0; min-height: 100vh; min-height: 100dvh; overflow-x: hidden;
+  margin: 0; min-height: 100dvh; overflow: hidden;
   background:
     radial-gradient(circle at 50% 42%, rgb(66 35 78 / 48%), transparent 38%),
     radial-gradient(circle at 16% 12%, rgb(38 31 74 / 40%), transparent 28%),
     var(--bg);
   color: var(--txt); font-family: Georgia, serif;
 }
-main { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 1rem; text-align: center; }
-.stage { width: min(100%, 68rem); }
+#app { min-height: 100dvh; }
+#app[aria-busy="true"] { display: grid; place-items: center; padding: 1rem; text-align: center; }
+main {
+  height: 100dvh;
+  display: flex;
+  padding:
+    max(0.5rem, env(safe-area-inset-top))
+    max(0.7rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom))
+    max(0.7rem, env(safe-area-inset-left));
+  text-align: center;
+}
+.stage { flex: 1; width: 100%; min-height: 0; display: flex; flex-direction: column; }
 .visual {
+  container-type: size;
   position: relative;
+  flex: 1 1 auto;
   width: 100%;
-  height: min(72vh, 46rem);
-  min-height: 25rem;
+  min-height: 0;
   display: grid;
   place-items: center;
   isolation: isolate;
 }
+.caption { flex: 0 1 auto; width: min(100%, 46rem); max-height: 28dvh; margin: 0 auto; overflow: auto; }
 .constellation {
   position: absolute;
   inset: 0;
@@ -28,7 +42,7 @@ main { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center
 }
 .constellation.forming { animation: cosmic-pulse 1.8s ease-in-out infinite; }
 button.box {
-  width: min(76vw, 300px); height: auto; aspect-ratio: 240 / 236; border: 0; background: transparent; padding: 0;
+  width: auto; height: min(74cqh, 88cqw); max-width: 100%; aspect-ratio: 240 / 236; border: 0; background: transparent; padding: 0;
   touch-action: manipulation; cursor: pointer; position: relative; z-index: 2;
 }
 button.box:focus-visible { outline: 2px solid #f3d27a; outline-offset: 8px; border-radius: 1.4rem; }
@@ -47,7 +61,6 @@ button.box:focus-visible { outline: 2px solid #f3d27a; outline-offset: 8px; bord
 .bouquet-name { margin: .15rem 0 0; font-size: clamp(1.6rem, 4vw, 2.4rem); letter-spacing: .08em; }
 .message { margin: .5rem auto 0; max-width: 42rem; font-size: clamp(1.25rem, 3vw, 1.75rem); line-height: 1.4; white-space: pre-wrap; }
 pre.art { margin: 0 auto; line-height: 1; white-space: pre; font-family: ui-monospace, Menlo, Consolas, monospace; font-variant-ligatures: none; text-align: left; }
-.color-probe { position: absolute; visibility: hidden; pointer-events: none; }
 .sr-only {
   position: absolute;
   width: 1px;
@@ -70,10 +83,10 @@ pre.art.mono span { color: hsl(var(--mh), var(--ms), min(94%, calc(var(--ml) * v
 @keyframes wiggle { 40% { transform: rotate(-4deg); } 70% { transform: rotate(4deg); } }
 @keyframes shake { 25% { transform: translateX(-6px) rotate(-2deg); } 75% { transform: translateX(6px) rotate(2deg); } }
 @keyframes cosmic-pulse { 50% { filter: saturate(1.2) brightness(1.08); } }
-@media (max-width: 600px) {
-  main { padding: .5rem; }
-  .visual { height: min(68vh, 34rem); min-height: 22rem; }
-  button.box { width: min(74vw, 280px); }
+@media (max-width: 700px), (max-height: 520px) {
+  .caption { max-height: 34dvh; }
+  .bouquet-name { font-size: clamp(1.25rem, 5vw, 1.8rem); }
+  .message { font-size: clamp(1rem, 3.6vw, 1.3rem); }
 }
 @media (prefers-reduced-motion: reduce) {
   .box.idle, .box.wiggle, .box.shake, .constellation.forming { animation: none; }
