@@ -147,6 +147,8 @@ describe('api', () => {
     expect(sent).toHaveLength(1);
     expect(sent[0]?.to).toBe('ami@example.com');
     expect(sent[0]?.html).toContain('Pour &lt;toi&gt;');
+    expect(sent[0]?.html).toContain('Ouvrir le cadeau');
+    expect(sent[0]?.html).not.toContain('<pre');
     expect(sent[0]?.html).toContain(gift.shareUrl);
     expect(sent[0]?.text).toContain(gift.shareUrl);
 

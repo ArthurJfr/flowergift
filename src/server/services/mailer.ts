@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import { RESOLUTIONS, createScene, renderFrame, toEmailHtml } from '../../engine/index.js';
 import type { Config } from '../config.js';
 import type { GiftDto } from './gifts.js';
 
@@ -52,28 +51,39 @@ function escapeHtml(value: string): string {
 }
 
 export function giftMail(gift: GiftDto): OutboundMail {
-  const resolution = RESOLUTIONS[0];
-  if (!resolution) throw new Error('résolution manquante');
-  const scene = createScene({
-    bouquetId: gift.bouquetId,
-    style: gift.style,
-    wrap: gift.wrap,
-    cols: resolution.cols,
-    rows: resolution.rows,
-    seed: 1,
-    petals: false,
-  });
-  const preview = toEmailHtml(renderFrame(scene, 6, 6, 0), { style: gift.style, t: 6 });
   const message = gift.message?.trim() ? escapeHtml(gift.message.trim()) : 'Un bouquet t’attend.';
   const from = escapeHtml(gift.fromName);
   const url = escapeHtml(gift.shareUrl);
   const subject = `${gift.fromName} t’offre un bouquet`;
   const text = [gift.message?.trim() || 'Un bouquet t’attend.', '', `Ouvre le cadeau : ${gift.shareUrl}`, '', `De la part de ${gift.fromName}`].join('\n');
-  const html = `<div style="font-family:Georgia,serif;color:#2a211c">
-<p>${message.replaceAll('\n', '<br>')}</p>
-<p><a href="${url}" style="display:inline-block;background:#b5526a;color:#fff;text-decoration:none;padding:12px 18px;border-radius:999px">Ouvrir le cadeau</a></p>
-${preview}
-<p style="color:#6d5c52;font-size:13px">De la part de ${from}. Toute personne qui a le lien peut voir le cadeau.</p>
-</div>`;
+  const html = `<!doctype html>
+<html lang="fr">
+  <body style="margin:0;padding:0;background:#100c14;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#100c14;padding:32px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#1b1422;border:1px solid #3a2a40;border-radius:28px;">
+            <tr>
+              <td align="center" style="padding:40px 32px 34px;font-family:Georgia,'Times New Roman',serif;color:#f6efe8;">
+                <p style="margin:0;font-size:34px;line-height:1;color:#e56b8a;">✿</p>
+                <p style="margin:16px 0 0;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#cbb8ac;">FlowerGift</p>
+                <h1 style="margin:16px 0 0;font-size:30px;line-height:1.25;font-weight:normal;">${from} t’offre un bouquet</h1>
+                <p style="margin:24px 0 0;font-size:18px;line-height:1.55;color:#f6efe8;">${message.replaceAll('\n', '<br>')}</p>
+                <table role="presentation" cellpadding="0" cellspacing="0" style="margin:32px auto 0;">
+                  <tr>
+                    <td bgcolor="#e56b8a" style="border-radius:999px;">
+                      <a href="${url}" style="display:inline-block;padding:15px 30px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1;color:#2a1020;text-decoration:none;border-radius:999px;">Ouvrir le cadeau</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:26px 0 0;font-size:13px;line-height:1.5;color:#cbb8ac;">De la part de ${from}.<br>Toute personne qui a le lien peut voir le cadeau.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
   return { to: gift.recipientEmail ?? '', subject, html, text };
 }
