@@ -34,10 +34,32 @@ interface Gift {
   recipientEmail: string | null;
   status: string;
   createdAt: string;
+  firstClickedAt: string | null;
+  clickCount: number;
+  firstOpenedAt: string | null;
   openCount: number;
   sendError: string | null;
 }
 interface ApiError { error: string; message: string }
+
+const statusLabels: Record<string, string> = {
+  created: 'Créé',
+  sent: 'Envoyé',
+  clicked: 'Mail cliqué',
+  opened: 'Bouquet ouvert',
+  expired: 'Expiré',
+  revoked: 'Révoqué',
+};
+
+function statusLabel(status: string): string {
+  return statusLabels[status] ?? status;
+}
+
+function when(value: string | null, count: number): string {
+  if (!value) return 'pas encore';
+  const date = new Date(value).toLocaleString('fr');
+  return count > 1 ? `${date} · ${count} fois` : date;
+}
 
 function required<T extends Element>(selector: string): T {
   const node = document.querySelector<T>(selector);
@@ -321,8 +343,10 @@ async function showDash(): Promise<void> {
     if (result.status !== 200) return;
     for (const gift of result.body.items) {
       const card = el('article');
-      card.append(el('strong', '', `${gift.fromName} · ${gift.status}`));
+      card.append(el('strong', '', `${gift.fromName} · ${statusLabel(gift.status)}`));
       card.append(el('p', 'muted', new Date(gift.createdAt).toLocaleString('fr')));
+      card.append(el('p', 'muted', `Clic dans le mail : ${when(gift.firstClickedAt, gift.clickCount)}`));
+      card.append(el('p', 'muted', `Ouverture du bouquet : ${when(gift.firstOpenedAt, gift.openCount)}`));
       if (gift.message) card.append(el('p', '', gift.message));
       const url = el('p', 'share', gift.shareUrl);
       const buttons = el('div', 'row');

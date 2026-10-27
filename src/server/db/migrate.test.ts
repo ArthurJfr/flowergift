@@ -24,9 +24,9 @@ describe('migrations', () => {
     const second = migrate(db, migrationsDir);
     const rows = db.prepare('SELECT id FROM schema_migrations ORDER BY id').all() as { id: string }[];
 
-    expect(first).toEqual(['001_init.sql', '002_sessions.sql', '003_gifts.sql']);
+    expect(first).toEqual(['001_init.sql', '002_sessions.sql', '003_gifts.sql', '004_tracking.sql']);
     expect(second).toEqual([]);
-    expect(rows.map((row) => row.id)).toEqual(['001_init.sql', '002_sessions.sql', '003_gifts.sql']);
+    expect(rows.map((row) => row.id)).toEqual(['001_init.sql', '002_sessions.sql', '003_gifts.sql', '004_tracking.sql']);
     db.close();
   });
 });

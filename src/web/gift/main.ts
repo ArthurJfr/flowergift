@@ -46,6 +46,7 @@ colors.textContent = slotCss();
 document.head.appendChild(colors);
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fromMail = new URLSearchParams(location.search).get('via') === 'mail';
 const token = location.pathname.split('/').filter(Boolean).at(-1) ?? '';
 
 function unavailable(): void {
@@ -64,6 +65,12 @@ else void openGift(token);
 async function openGift(giftToken: string): Promise<void> {
   const response = await fetch(`/api/public/gifts/${giftToken}`, { headers: { accept: 'application/json' } });
   if (!response.ok) { unavailable(); return; }
+  if (fromMail) {
+    const clean = new URL(location.href);
+    clean.searchParams.delete('via');
+    history.replaceState(null, '', `${clean.pathname}${clean.search}${clean.hash}`);
+    void fetch(`/api/public/gifts/${giftToken}/clicked`, { method: 'POST' }).catch(() => undefined);
+  }
   const gift = await response.json() as PublicGift;
   renderBox(gift, giftToken);
 }

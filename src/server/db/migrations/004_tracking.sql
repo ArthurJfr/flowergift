@@ -1,0 +1,2 @@
+ALTER TABLE gifts ADD COLUMN first_clicked_at TEXT;
+ALTER TABLE gifts ADD COLUMN click_count INTEGER NOT NULL DEFAULT 0;

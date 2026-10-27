@@ -3,7 +3,7 @@ import type Database from 'better-sqlite3';
 import type { BouquetId, ColorMode, ResolutionId, StyleId, WrapId } from '../../engine/index.js';
 import type { Config } from '../config.js';
 
-export type GiftStatus = 'created' | 'sent' | 'opened' | 'expired' | 'revoked';
+export type GiftStatus = 'created' | 'sent' | 'clicked' | 'opened' | 'expired' | 'revoked';
 
 export interface GiftInput {
   bouquetId: BouquetId;
@@ -33,6 +33,8 @@ export interface GiftDto {
   createdAt: string;
   expiresAt: string | null;
   revokedAt: string | null;
+  firstClickedAt: string | null;
+  clickCount: number;
   firstOpenedAt: string | null;
   openCount: number;
   sentAt: string | null;
@@ -65,6 +67,8 @@ interface GiftRow {
   created_at: string;
   expires_at: string | null;
   revoked_at: string | null;
+  first_clicked_at: string | null;
+  click_count: number;
   first_opened_at: string | null;
   open_count: number;
   sent_at: string | null;
@@ -76,6 +80,7 @@ function statusOf(row: GiftRow, now: string): GiftStatus {
   if (row.revoked_at) return 'revoked';
   if (row.expires_at && row.expires_at <= now) return 'expired';
   if (row.first_opened_at) return 'opened';
+  if (row.first_clicked_at) return 'clicked';
   if (row.send_status === 'ok') return 'sent';
   return 'created';
 }
@@ -102,6 +107,8 @@ export function toGift(row: GiftRow, config: Config, now = new Date().toISOStrin
     createdAt: row.created_at,
     expiresAt: row.expires_at,
     revokedAt: row.revoked_at,
+    firstClickedAt: row.first_clicked_at,
+    clickCount: row.click_count,
     firstOpenedAt: row.first_opened_at,
     openCount: row.open_count,
     sentAt: row.sent_at,
@@ -192,6 +199,19 @@ export function publicGift(db: Database.Database, config: Config, token: string)
     message: row.message,
     boxTaps: config.giftBoxTaps,
   };
+}
+
+export function markClicked(db: Database.Database, token: string): boolean {
+  const row = rowByToken(db, token);
+  if (!row || unavailable(row, new Date().toISOString())) return false;
+  const now = new Date().toISOString();
+  db.prepare(
+    `UPDATE gifts
+     SET click_count = click_count + 1,
+         first_clicked_at = COALESCE(first_clicked_at, ?)
+     WHERE id = ?`,
+  ).run(now, row.id);
+  return true;
 }
 
 export function markOpened(db: Database.Database, token: string): boolean {

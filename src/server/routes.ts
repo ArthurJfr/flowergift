@@ -16,6 +16,7 @@ import {
   deleteGift,
   getGift,
   listGifts,
+  markClicked,
   markOpened,
   markSendFailed,
   markSent,
@@ -32,7 +33,7 @@ const styleId = z.enum(['classique', 'detail', 'blocs', 'texte', 'binaire', 'con
 const colorMode = z.enum(['color', 'mono-green', 'mono-amber', 'mono-white']);
 const wrapId = z.enum(['paper', 'vase', 'ribbon']);
 const resolutionId = z.enum(['standard', 'high', 'ultra']);
-const giftStatus = z.enum(['created', 'sent', 'opened', 'expired', 'revoked']);
+const giftStatus = z.enum(['created', 'sent', 'clicked', 'opened', 'expired', 'revoked']);
 
 const loginBody = z.object({
   email: z.email(),
@@ -282,6 +283,14 @@ export async function registerRoutes(app: FastifyInstance, deps: RouteDeps): Pro
     const gift = publicGift(db, config, token);
     if (!gift) return reply.code(404).send({ error: 'unavailable', message: 'Ce cadeau n’est plus disponible' });
     return gift;
+  });
+
+  app.post('/api/public/gifts/:token/clicked', publicLimit, async (request, reply) => {
+    const token = (request.params as { token: string }).token;
+    if (!markClicked(db, token)) {
+      return reply.code(404).send({ error: 'unavailable', message: 'Ce cadeau n’est plus disponible' });
+    }
+    return reply.code(204).send();
   });
 
   app.post('/api/public/gifts/:token/opened', publicLimit, async (request, reply) => {

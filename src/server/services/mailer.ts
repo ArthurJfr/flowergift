@@ -53,9 +53,10 @@ function escapeHtml(value: string): string {
 export function giftMail(gift: GiftDto): OutboundMail {
   const message = gift.message?.trim() ? escapeHtml(gift.message.trim()) : 'Un bouquet t’attend.';
   const from = escapeHtml(gift.fromName);
-  const url = escapeHtml(gift.shareUrl);
+  const tracked = `${gift.shareUrl}${gift.shareUrl.includes('?') ? '&' : '?'}via=mail`;
+  const url = escapeHtml(tracked);
   const subject = `${gift.fromName} t’offre un bouquet`;
-  const text = [gift.message?.trim() || 'Un bouquet t’attend.', '', `Ouvre le cadeau : ${gift.shareUrl}`, '', `De la part de ${gift.fromName}`].join('\n');
+  const text = [gift.message?.trim() || 'Un bouquet t’attend.', '', `Ouvre le cadeau : ${tracked}`, '', `De la part de ${gift.fromName}`].join('\n');
   const html = `<!doctype html>
 <html lang="fr">
   <body style="margin:0;padding:0;background:#100c14;">

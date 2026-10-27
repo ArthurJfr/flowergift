@@ -135,6 +135,13 @@ describe('api', () => {
       boxTaps: 2,
     });
 
+    const clicked = await app.inject({ method: 'POST', url: `/api/public/gifts/${gift.token}/clicked` });
+    expect(clicked.statusCode).toBe(204);
+    const afterClick = await app.inject({ method: 'GET', url: `/api/gifts/${gift.id}`, headers: { cookie } });
+    expect(afterClick.json().status).toBe('clicked');
+    expect(afterClick.json().clickCount).toBe(1);
+    expect(afterClick.json().firstClickedAt).toEqual(expect.any(String));
+
     const opened = await app.inject({ method: 'POST', url: `/api/public/gifts/${gift.token}/opened` });
     expect(opened.statusCode).toBe(204);
     const again = await app.inject({ method: 'GET', url: `/api/gifts/${gift.id}`, headers: { cookie } });
@@ -149,8 +156,8 @@ describe('api', () => {
     expect(sent[0]?.html).toContain('Pour &lt;toi&gt;');
     expect(sent[0]?.html).toContain('Ouvrir le cadeau');
     expect(sent[0]?.html).not.toContain('<pre');
-    expect(sent[0]?.html).toContain(gift.shareUrl);
-    expect(sent[0]?.text).toContain(gift.shareUrl);
+    expect(sent[0]?.html).toContain(`${gift.shareUrl}?via=mail`);
+    expect(sent[0]?.text).toContain(`${gift.shareUrl}?via=mail`);
 
     const unknown = await app.inject({ method: 'GET', url: '/api/public/gifts/inconnu-token-xxxxxxxx' });
     const revoked = await app.inject({ method: 'POST', url: `/api/gifts/${gift.id}/revoke`, headers: { cookie } });
