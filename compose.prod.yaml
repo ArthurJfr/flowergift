@@ -13,18 +13,19 @@ services:
     volumes:
       - flowergift-data:/data
     networks:
-      - traefik
+      - traefik_net
     labels:
       - traefik.enable=true
-      - traefik.docker.network=traefik
+      - traefik.docker.network=${TRAEFIK_NETWORK:-relais-prod_relais-net}
       - traefik.http.routers.flowergift.rule=Host(`${APP_DOMAIN}`)
       - traefik.http.routers.flowergift.entrypoints=websecure
-      - traefik.http.routers.flowergift.tls.certresolver=letsencrypt
+      - traefik.http.routers.flowergift.tls.certresolver=${TRAEFIK_CERTRESOLVER:-myresolver}
       - traefik.http.services.flowergift.loadbalancer.server.port=3000
 
 volumes:
   flowergift-data:
 
 networks:
-  traefik:
+  traefik_net:
     external: true
+    name: ${TRAEFIK_NETWORK:-relais-prod_relais-net}
